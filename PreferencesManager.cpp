@@ -14,11 +14,17 @@ namespace Cockpit {
     int                     PreferencesManager::m_menu_container_index;
     XPLMMenuID              PreferencesManager::m_menu_id;
     SerialManager           *PreferencesManager::m_serial_manager;
+    
+    // Preferences forward declares.
+    std::string             PreferencesManager::m_mcp_device_name("MCP_Panel");
+    std::string             PreferencesManager::m_fmc_device_name("FMC_Panel");
 
     void PreferencesManager::init(SerialManager *t_serial_manager) {
         m_serial_manager = t_serial_manager;
         XPLMEnableFeature("XPLM_USE_NATIVE_WIDGET_WINDOWS", 1);
         PreferencesManager::setupMenu();
+        PreferencesManager::writeToFile();
+        PreferencesManager::loadFromFile();
     }
 
     void PreferencesManager::deinit() {
@@ -27,32 +33,23 @@ namespace Cockpit {
         PreferencesManager::m_window = NULL;
     }
     
-    // Not called in init until fully implemented.
+    void PreferencesManager::writeToFile() {
+        std::ofstream prefs_file("/Users/mikeb/X-Plane 11/Resources/plugins/737_Cockpit_Plugin/prefs.txt");
+        prefs_file.clear();
+        
+        prefs_file.write(m_mcp_device_name.c_str(), m_mcp_device_name.length());
+        prefs_file.write(m_fmc_device_name.c_str(), m_fmc_device_name.length());
+        
+        prefs_file.close();
+    }
+    
     void PreferencesManager::loadFromFile() {
-        char system_path[512];
-        XPLMGetSystemPath(system_path);
-        const char *sep = XPLMGetDirectorySeparator();
-        char prefs_filename[512];
-        sprintf(prefs_filename, "%s%sResources%splugins%s737_Cockpit_Plugin%sprefs.txt", system_path, sep, sep, sep, sep);
-        
-        int prefs_file = open(prefs_filename, O_RDWR);
-        
-        fd_set set;
-        struct timeval timeout;
-        
-        __DARWIN_FD_ZERO(&set);
-        __DARWIN_FD_SET(prefs_file, &set);
-        
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 0;
-        
-        while(select(__DARWIN_FD_SETSIZE, &set, NULL, NULL, &timeout) == 1) {
-            char line_buffer[512];
-            size_t bytes_read = read(prefs_file, &line_buffer, 512);
-            
+        std::ifstream prefs_file("/Users/mikeb/X-Plane 11/Resources/plugins/737_Cockpit_Plugin/prefs.txt");
+        if(!prefs_file.eof()) {
+            std::getline(prefs_file, m_mcp_device_name);
+            std::getline(prefs_file, m_fmc_device_name);
         }
-        
-        
+        prefs_file.close();
     }
 
     void PreferencesManager::setupMenu() {

@@ -9,6 +9,8 @@
 #define PreferencesManager_hpp
 
 #include <string>
+#include <iostream>
+#include <fstream>
 #include "XPLMDisplay.h"
 #include "XPLMGraphics.h"
 #include "XPLMMenus.h"
@@ -23,6 +25,11 @@ namespace Cockpit {
     public:
         static void                             init(SerialManager *t_serial_manager);
         static void                             deinit();
+        
+        // Preferences
+        static std::string                      m_mcp_device_name;
+        static std::string                      m_fmc_device_name;
+        
     private:
         // Variables
         static XPWidgetID                       m_window;
@@ -40,6 +47,7 @@ namespace Cockpit {
         static void                             createWindow();
         static void                             setupMenu();
         static void                             loadFromFile();
+        static void                             writeToFile();
     };
     
 } // namespace Cockpit

@@ -35,7 +35,7 @@ namespace Cockpit {
         
         // Loop files and find 'cu.usbmodem' devices; add them to serial devices list vector.
         for(int inx = 0; inx <= all_files.size() - 1; inx++) {
-            if(all_files[inx].find("cu.usbmodem") != std::string::npos) {
+            if(all_files[inx].find("cu.usbmodem") != std::string::npos || all_files[inx].find("cu.usbserial") != std::string::npos) {
                 m_serial_devices.push_back(SerialPort("/dev/" + all_files[inx]));
             }
         }
@@ -51,18 +51,23 @@ namespace Cockpit {
                 usleep(1000);
             }
             this->m_serial_devices[inx].writeData("QUERY_DEVICE_NAME");
-            while(!this->m_serial_devices[inx].hasData()) {
-                usleep(1000);
+            
+//            int wait_for_data_loops = 0;
+//            while(!this->m_serial_devices[inx].hasData() && wait_for_data_loops <= 5) {
+//                usleep(1000);
+//                ++wait_for_data_loops;
+//            }
+            
+            usleep(1000);
+            if(this->m_serial_devices[inx].hasData()) {
+                std::string dev_name = this->m_serial_devices[inx].readData();
+                this->m_serial_devices[inx].setName(dev_name);
+                printf("MCP: Device Name Returned: %s \n", dev_name.c_str());
             }
-            std::string dev_name = this->m_serial_devices[inx].readData();
-            printf("MCP: Device Name Returned: %s \n", dev_name.c_str());
             
             this->m_serial_devices[inx].closePort();
-            this->m_serial_devices[inx].setName(dev_name);
-            
-            if(dev_name.find("MCP Panel") != std::string::npos) {
-                mcp_port = &m_serial_devices[inx];
-            }
+            mcp_port = &m_serial_devices[inx];
+    
         }
     }
 } // namespace Cockpit

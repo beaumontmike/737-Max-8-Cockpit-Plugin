@@ -44,15 +44,16 @@ namespace Cockpit {
         strcpy(outSig, "mtb.Cockpit.737");
         strcpy(outDesc, "An interface for a 737 Hardware Cockpit.");
         
+        PreferencesManager::init(g_serial_manager.get());
+        
         // Initialize SerialManager and return if no devices available.
         g_serial_manager = std::unique_ptr<SerialManager>(new SerialManager());
         if(g_serial_manager->getDevices()->size() <= 0) return 1;
         
-        
         g_mcp_manager = std::unique_ptr<MCPManager>(new MCPManager(g_serial_manager->mcp_port));
         g_mcp_manager->serialBegin();
         
-        PreferencesManager::init(g_serial_manager.get());
+        
         
         XPLMRegisterFlightLoopCallback(deferred_init, 1, 0);
         XPLMRegisterFlightLoopCallback(write_flight_loop, 1, 0);
