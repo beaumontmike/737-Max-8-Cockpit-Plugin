@@ -27,6 +27,7 @@ namespace Cockpit {
         PreferencesManager::m_window = NULL;
     }
     
+    // Not called in init until fully implemented.
     void PreferencesManager::loadFromFile() {
         char system_path[512];
         XPLMGetSystemPath(system_path);
